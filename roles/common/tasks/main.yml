@@ -1,0 +1,29 @@
+---
+- name: install software-properties-common
+  apt: name={{ item }} state=latest
+  with_items:
+    - software-properties-common
+
+- name: add liberty cloudarchive
+#  apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/liverty main' state=present
+  shell: echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/liberty main" > /etc/apt/sources.list.d/cloudarchive-liberty.list
+- name: update packages once
+  apt: update_cache=yes 
+
+#- name: update hosts files to all hosts
+#  template: src=hosts
+#            dest=/etc/hosts
+#            backup=yes
+- name: set timezone Asia/Tokyo
+  shell: timedatectl set-timezone Asia/Tokyo
+
+- name: install common packages
+  apt: name={{ item }} force=yes state=latest
+  with_items:
+    - python-openstackclient
+    - ntp
+
+- name: update ntp conf
+  template: src=ntp.conf dest=/etc/ntp.conf backup=yes
+  notify:
+    - restart ntp
